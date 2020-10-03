@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package grpc;
+
+service Updater {
+  rpc updateModel (updateRequest) returns (updateReply) {}
+}
+
+message updateRequest {
+  bytes model = 1;
+}
+
+message updateReply {
+  bytes model = 1;
+}

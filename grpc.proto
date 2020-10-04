@@ -4,12 +4,19 @@ package grpc;
 
 service Updater {
   rpc updateModel (updateRequest) returns (updateReply) {}
+  rpc connect (connecting) returns (Empty){}
 }
 
 message updateRequest {
   bytes model = 1;
+  uint64 size = 2;
 }
 
 message updateReply {
   bytes model = 1;
+}
+message Empty {}
+
+message connecting {
+  int32 conn = 1;
 }

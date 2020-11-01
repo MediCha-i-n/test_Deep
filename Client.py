@@ -8,7 +8,7 @@ import pickle
 from Polyp_gen import Generator
 
 
-def train(stub, generator, model):
+def fitting(stub, generator, model):
     best_loss = 50000
     while(1):
         prev_model = clone_model(model)
@@ -34,6 +34,11 @@ def train(stub, generator, model):
 
         n_model = pickle.loads(n_model.model)
         model = model_from_json(n_model)
+def validation():
+    pass
+
+def sendToServer():
+    pass
 
 
 def main():

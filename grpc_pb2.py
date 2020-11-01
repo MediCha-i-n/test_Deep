@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\ngrpc.proto\x12\x04grpc\",\n\rupdateRequest\x12\r\n\x05model\x18\x01 \x01(\x0c\x12\x0c\n\x04size\x18\x02 \x01(\x04\"\x1c\n\x0bupdateReply\x12\r\n\x05model\x18\x01 \x01(\x0c\"\x07\n\x05\x45mpty\"\x1a\n\nconnecting\x12\x0c\n\x04\x63onn\x18\x01 \x01(\x05\x32n\n\x07Updater\x12\x37\n\x0bupdateModel\x12\x13.grpc.updateRequest\x1a\x11.grpc.updateReply\"\x00\x12*\n\x07\x63onnect\x12\x10.grpc.connecting\x1a\x0b.grpc.Empty\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\ngrpc.proto\x12\x04grpc\"F\n\rupdateRequest\x12\r\n\x05model\x18\x01 \x01(\x0c\x12\x12\n\nwhole_size\x18\x02 \x01(\x04\x12\x12\n\nbatch_size\x18\x03 \x01(\x04\"\x1c\n\x0bupdateReply\x12\r\n\x05model\x18\x01 \x01(\x0c\x32@\n\x07Updater\x12\x35\n\tsendModel\x12\x13.grpc.updateRequest\x1a\x11.grpc.updateReply\"\x00\x62\x06proto3'
 )
 
 
@@ -41,8 +41,15 @@ _UPDATEREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='size', full_name='grpc.updateRequest.size', index=1,
+      name='whole_size', full_name='grpc.updateRequest.whole_size', index=1,
       number=2, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='batch_size', full_name='grpc.updateRequest.batch_size', index=2,
+      number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -60,7 +67,7 @@ _UPDATEREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=20,
-  serialized_end=64,
+  serialized_end=90,
 )
 
 
@@ -91,71 +98,12 @@ _UPDATEREPLY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=66,
-  serialized_end=94,
-)
-
-
-_EMPTY = _descriptor.Descriptor(
-  name='Empty',
-  full_name='grpc.Empty',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=96,
-  serialized_end=103,
-)
-
-
-_CONNECTING = _descriptor.Descriptor(
-  name='connecting',
-  full_name='grpc.connecting',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='conn', full_name='grpc.connecting.conn', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=105,
-  serialized_end=131,
+  serialized_start=92,
+  serialized_end=120,
 )
 
 DESCRIPTOR.message_types_by_name['updateRequest'] = _UPDATEREQUEST
 DESCRIPTOR.message_types_by_name['updateReply'] = _UPDATEREPLY
-DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
-DESCRIPTOR.message_types_by_name['connecting'] = _CONNECTING
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 updateRequest = _reflection.GeneratedProtocolMessageType('updateRequest', (_message.Message,), {
@@ -172,20 +120,6 @@ updateReply = _reflection.GeneratedProtocolMessageType('updateReply', (_message.
   })
 _sym_db.RegisterMessage(updateReply)
 
-Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
-  'DESCRIPTOR' : _EMPTY,
-  '__module__' : 'grpc_pb2'
-  # @@protoc_insertion_point(class_scope:grpc.Empty)
-  })
-_sym_db.RegisterMessage(Empty)
-
-connecting = _reflection.GeneratedProtocolMessageType('connecting', (_message.Message,), {
-  'DESCRIPTOR' : _CONNECTING,
-  '__module__' : 'grpc_pb2'
-  # @@protoc_insertion_point(class_scope:grpc.connecting)
-  })
-_sym_db.RegisterMessage(connecting)
-
 
 
 _UPDATER = _descriptor.ServiceDescriptor(
@@ -195,26 +129,16 @@ _UPDATER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=133,
-  serialized_end=243,
+  serialized_start=122,
+  serialized_end=186,
   methods=[
   _descriptor.MethodDescriptor(
-    name='updateModel',
-    full_name='grpc.Updater.updateModel',
+    name='sendModel',
+    full_name='grpc.Updater.sendModel',
     index=0,
     containing_service=None,
     input_type=_UPDATEREQUEST,
     output_type=_UPDATEREPLY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='connect',
-    full_name='grpc.Updater.connect',
-    index=1,
-    containing_service=None,
-    input_type=_CONNECTING,
-    output_type=_EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

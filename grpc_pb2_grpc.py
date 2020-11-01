@@ -14,28 +14,17 @@ class UpdaterStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.updateModel = channel.unary_unary(
-                '/grpc.Updater/updateModel',
+        self.sendModel = channel.unary_unary(
+                '/grpc.Updater/sendModel',
                 request_serializer=grpc__pb2.updateRequest.SerializeToString,
                 response_deserializer=grpc__pb2.updateReply.FromString,
-                )
-        self.connect = channel.unary_unary(
-                '/grpc.Updater/connect',
-                request_serializer=grpc__pb2.connecting.SerializeToString,
-                response_deserializer=grpc__pb2.Empty.FromString,
                 )
 
 
 class UpdaterServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def updateModel(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def connect(self, request, context):
+    def sendModel(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -44,15 +33,10 @@ class UpdaterServicer(object):
 
 def add_UpdaterServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'updateModel': grpc.unary_unary_rpc_method_handler(
-                    servicer.updateModel,
+            'sendModel': grpc.unary_unary_rpc_method_handler(
+                    servicer.sendModel,
                     request_deserializer=grpc__pb2.updateRequest.FromString,
                     response_serializer=grpc__pb2.updateReply.SerializeToString,
-            ),
-            'connect': grpc.unary_unary_rpc_method_handler(
-                    servicer.connect,
-                    request_deserializer=grpc__pb2.connecting.FromString,
-                    response_serializer=grpc__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -65,7 +49,7 @@ class Updater(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def updateModel(request,
+    def sendModel(request,
             target,
             options=(),
             channel_credentials=None,
@@ -75,25 +59,8 @@ class Updater(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/grpc.Updater/updateModel',
+        return grpc.experimental.unary_unary(request, target, '/grpc.Updater/sendModel',
             grpc__pb2.updateRequest.SerializeToString,
             grpc__pb2.updateReply.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def connect(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/grpc.Updater/connect',
-            grpc__pb2.connecting.SerializeToString,
-            grpc__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

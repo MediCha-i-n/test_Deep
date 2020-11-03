@@ -3,7 +3,10 @@ syntax = "proto3";
 package grpc;
 
 service Updater {
-  rpc  sendModel(updateRequest) returns (updateReply) {}
+  rpc sendModel(updateRequest) returns (updateReply) {}
+}
+service Validator {
+  rpc validation(valRequest) returns(valReply) {}
 }
 
 message updateRequest {
@@ -11,7 +14,14 @@ message updateRequest {
   uint64 whole_size = 2;
   uint64 batch_size = 3;
 }
+message valRequest {
+  bytes model = 1;
+}
+message valReply {
+  float loss = 1;
+}
 
 message updateReply {
   bytes model = 1;
+  bool train = 2;
 }

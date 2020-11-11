@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package grpc;
+
+service Receiver {
+  rpc receiveModel(Request) returns (Empty) {}
+}
+
+message Request {
+  bytes model = 1;
+}
+message Empty {}

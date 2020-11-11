@@ -48,15 +48,8 @@ def main():
                                     options = [('grpc.max_send_message_length', 1024*1024*1024),
                                                ('grpc_max_receive_message_length', 1024*1024*1024)])
     stub = grpc_pb2_grpc.UpdaterStub(channel)
-    generator = train_Generator(patch_size=256, batch_size=8, path = "./../polyps/Kvasir-SEG")
+    generator = train_Generator(patch_size=256, batch_size=8, path = "./../polyps/CVC-ColonDB")
 
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1), options=[
-        ('grpc.max_send_message_length', 1024 * 1024 * 1024),
-        ('grpc.max_receive_message_length', 1024 * 1024 * 1024)
-    ])
-    grpc_pb2_grpc.add_ValidatorServicer_to_server(Validator(), server)
-    server.add_insecure_port("[::]:8888")
-    server.start()
 
     model = Unet.Unet()
 

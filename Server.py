@@ -28,15 +28,12 @@ stub = grpc_pb2_grpc.ValidatorStub(channel)
 
 
 class Updater(grpc_pb2_grpc.UpdaterServicer):
-    def __init__(self):
+    def sendModel(self, request, contest):
         global collected
         global weights
         global model
         global count
-    def sendModel(self, request, contest):
         print("received model")
-        model = Unet.Unet()
-        weights = model.get_weights()
 
         local_model = pickle.loads(request.model)
         local_model = model_from_json(local_model)
@@ -63,6 +60,9 @@ class Updater(grpc_pb2_grpc.UpdaterServicer):
             json = pickle.dumps(json)
             if count >= 10: reply = grpc_pb2.updateReply(model = json, train = False)
             else: reply = grpc_pb2.updateReply(model = json, train = True)
+
+        model = Unet.Unet()
+        weights = model.get_weights()
         return reply
 
 
@@ -93,7 +93,7 @@ def checkLoss():
 
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1), options=[
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=3), options=[
           ('grpc.max_send_message_length', 1024 * 1024 * 1024),
           ('grpc.max_receive_message_length', 1024 * 1024 * 1024)
       ])

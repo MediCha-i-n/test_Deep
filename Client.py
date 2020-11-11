@@ -6,7 +6,8 @@ import grpc_pb2_grpc
 import grpc_pb2
 import pickle
 from concurrent import futures
-from Polyp_gen import Generator
+from Polyp_gen import train_Generator
+import tensorflow as tf
 
 class Validator(grpc_pb2_grpc.ValidatorServicer):
     def validation(self, request, context):
@@ -23,16 +24,16 @@ class Validator(grpc_pb2_grpc.ValidatorServicer):
 def fitting(stub, generator, model):
     train = True
     while train:
-        optimizer = Adam(learning_rate=0.001)
+        optimizer = Adam(learning_rate=0.0001)
         model.compile(optimizer=optimizer, loss = 'binary_crossentropy')
         model.fit(generator.train_gen(), epochs = 1, steps_per_epoch=round(generator.length/8))
 
-        model, train = sendToServer(stub, model)
+        model, train = sendToServer(stub, model, generator)
 
 
-def sendToServer(stub, model):
+def sendToServer(stub, model, generator):
     json = pickle.dumps(model.to_json())
-    reply = stub.sendModel(grpc_pb2.updateRequest(model = json))
+    reply = stub.sendModel(grpc_pb2.updateRequest(model = json, batch_size = generator.train_len, whole_size = generator.whole_size))
     n_model = pickle.loads(reply.model)
     result = reply.train
 
@@ -47,16 +48,15 @@ def main():
                                     options = [('grpc.max_send_message_length', 1024*1024*1024),
                                                ('grpc_max_receive_message_length', 1024*1024*1024)])
     stub = grpc_pb2_grpc.UpdaterStub(channel)
-    generator = Generator(patch_size=256, batch_size=8)
+    generator = train_Generator(patch_size=256, batch_size=8, path = "./../polyps/Kvasir-SEG")
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1), options=[
         ('grpc.max_send_message_length', 1024 * 1024 * 1024),
         ('grpc.max_receive_message_length', 1024 * 1024 * 1024)
     ])
-    grpc_pb2_grpc.add_UpdaterServicer_to_server(Validator(), server)
+    grpc_pb2_grpc.add_ValidatorServicer_to_server(Validator(), server)
     server.add_insecure_port("[::]:8888")
     server.start()
-    server.wait_for_termination()
 
     model = Unet.Unet()
 

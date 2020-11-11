@@ -6,6 +6,9 @@ import Unet
 import pickle
 import numpy as np
 from tensorflow.keras.models import model_from_json
+import os
+
+os.environ["SET_VISIBLE_DEVICES"] = ''
 
 model = Unet.Unet()
 #python -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. grpc.proto

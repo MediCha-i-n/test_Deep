@@ -9,17 +9,6 @@ from concurrent import futures
 from Polyp_gen import train_Generator
 import tensorflow as tf
 
-class Validator(grpc_pb2_grpc.ValidatorServicer):
-    def validation(self, request, context):
-        data = [0,0,0,0,0,0]
-        '''
-        validation data 받는 부분
-        data = 
-        '''
-        model = pickle.loads(request.model)
-        loss = model.evaluate(data)
-        return loss
-
 
 def fitting(stub, generator, model):
     train = True

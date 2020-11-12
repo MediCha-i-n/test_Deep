@@ -7,6 +7,8 @@ import pickle
 import numpy as np
 from tensorflow.keras.models import model_from_json
 import os
+import webserver_pb2_grpc
+import webserver_pb2
 
 os.environ["SET_VISIBLE_DEVICES"] = ''
 
@@ -26,6 +28,12 @@ channel = grpc.insecure_channel('localhost:8888',
                                                ('grpc_max_receive_message_length', 1024*1024*1024)])
 stub = grpc_pb2_grpc.ValidatorStub(channel)
 
+channel_web = grpc.insecure_channel('localhost:7777',
+                                    options=[('grpc.max_send_message_length', 1024 * 1024 * 1024),
+                                             ('grpc_max_receive_message_length', 1024 * 1024 * 1024)]
+                                    )
+
+web_stub = webserver_pb2_grpc.ReceiverStub(channel_web)
 
 class Updater(grpc_pb2_grpc.UpdaterServicer):
     def sendModel(self, request, contest):
@@ -58,7 +66,9 @@ class Updater(grpc_pb2_grpc.UpdaterServicer):
         else:
             json = [0]
             json = pickle.dumps(json)
-            if count >= 10: reply = grpc_pb2.updateReply(model = json, train = False)
+            if count >= 10:
+                reply = grpc_pb2.updateReply(model = json, train = False)
+                ret = web_stub.receiveModel(model = request.model)
             else: reply = grpc_pb2.updateReply(model = json, train = True)
 
         model = Unet.Unet()

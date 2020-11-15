@@ -13,6 +13,7 @@ message updateRequest {
   bytes model = 1;
   uint64 whole_size = 2;
   uint64 batch_size = 3;
+  uint64 patch_size = 4;
 }
 message valRequest {
   bytes model = 1;

@@ -10,18 +10,24 @@ import base64
 
 
 class Generator():
-    def __init__(self, patch_size, batch_size):
-        self.files = muterun_js("trainDataQuery.js", '\"trainer1\"').stdout.decode('utf-8').split('\n')
+    def __init__(self, patch_size, batch_size, identity):
+        self.files = muterun_js("./application/dataQuery.js", identity).stdout.decode('utf-8').split("\n")[7:-2]
+        self.whole_size = int(muterun_js("./application/getTotalEnrollCount.js", identity).stdout.decode('utf-8').split("\n")[-2])
+        self.train_img = []
+        self.train_mask = []
         self.preprocess()
-        self.length = len(self.files)//2
-        self.train_img = self.files[:self.length]
-        self.train_mask = self.files[self.length:]
+        self.length = len(self.train_img)
         self.train = cycle(zip(self.train_img, self.train_mask))
         self.patch_size = patch_size
         self.batch_size = batch_size
+        self.patch_length = self.length
+
     def preprocess(self):
         for i in range(len(self.files)):
-            self.files[i] = base64.b64decode(self.files[i])
+            if i % 2 == 0:
+                self.train_img.append(base64.b64decode(self.files[i]))
+            else:
+                self.train_mask.append(base64.b64decode(self.files[i]))
     def generator(self):
 
         data = np.zeros((0, self.patch_size, self.patch_size, 3))
@@ -32,14 +38,15 @@ class Generator():
                 img, mask = next(self.train)
                 img, mask = self.get_patches(img, mask)
 
+
                 data = np.append(data, img, axis = 0)
                 masks = np.append(masks, mask, axis = 0)
 
             x = data[:self.batch_size, :, :, :]
             y = masks[:self.batch_size, :, :, :]
 
-            data [self.batch_size, :, :, :]
-            masks = masks[self.batch_size, :, :, :]
+            data = data[self.batch_size:, :, :, :]
+            masks = masks[self.batch_size:, :, :, :]
 
             yield x, y
 
@@ -47,90 +54,18 @@ class Generator():
         img = np.frombuffer(img, np.uint8)
         mask = np.frombuffer(mask, np.uint8)
 
-        img = cv2.imdecode(img, cv2.IMREAD_COLOR)/255.0
-        mask = cv2.imdecode(mask, cv2.IMREAD_GRAYSCALE)/255.0
+        img = cv2.imdecode(img, cv2.IMREAD_COLOR)
+        mask = cv2.imdecode(mask, cv2.IMREAD_GRAYSCALE)
+        _, mask = cv2.threshold(mask, 100, 255, cv2.THRESH_BINARY)
+        mask = (mask/255.0).astype('uint8')
 
-        img = extract_patches(img, (self.patch_size, self.patch_size, 3), 256). \
-            reshape(-1, self.patch_size, self.patch_size, 3)
-        mask = extract_patches(mask, (self.patch_size, self.patch_size), 256). \
-            reshape(-1, self.patch_size, self.patch_size, 1)
+        img = cv2.resize(img, (self.patch_size, self.patch_size))
+        mask = cv2.resize(mask, (self.patch_size, self.patch_size))
+
+        img = img.reshape(-1, img.shape[0], img.shape[1], img.shape[2])
+        mask = mask.reshape(-1, mask.shape[0], mask.shape[1], 1)
 
         return img, mask
 
 
 
-        
-
-
-class train_Generator():
-    def __init__(self, patch_size, batch_size, path, split = 0.1):
-        self.files = glob.glob(path+"/data/*")
-        self.length = len(self.files)
-        self.train_len = int(self.length*(1-split))
-        self.train_files = self.files[:self.train_len]
-        self.val_files = self.files[self.train_len:]
-        self.batch_size = batch_size
-        self.patch_size = patch_size
-        self.whole_size = 1575
-
-    def train_gen(self):
-        train_files = cycle(self.train_files)
-
-        data = np.zeros((0, self.patch_size, self.patch_size, 3))
-        label = np.zeros((0, self.patch_size, self.patch_size, 1))
-
-        while 1:
-
-            while data.shape[0] < self.batch_size:
-                file = next(train_files)
-
-                img, annot = self.patches(file)
-
-                data = np.append(data, img, axis = 0)
-                label = np.append(label, annot, axis = 0)
-            x = data[:self.batch_size, :, :, :]
-            y = label[:self.batch_size, :, :, :]
-
-            data = data[self.batch_size:, :, :, :]
-            label= label[self.batch_size:, :, :, :]
-
-            yield x, y
-
-    def val_gen(self):
-        val_files = cycle(self.val_files)
-
-        data = np.zeros((0, self.patch_size, self.patch_size, 3))
-        label = np.zeros((0, self.patch_size, self.patch_size, 1))
-
-        while 1:
-            if data.shape[0] == 0:
-                file = next(val_files)
-
-                img, annot = self.patches(file)
-
-                data = np.append(data, img, axis = 0)
-                label = np.append(label, annot, axis = 0)
-            x = data[0, :, :, :].reshape(-1, self.patch_size, self.patch_size, 3)
-            y = data[0, :, :, :].reshape(-1, self.patch_size, self.patch_size, 1)
-
-            data = data[1:, :, :, :]
-            label = label[1:, :, :, :]
-
-            yield x, y
-
-
-    def patches(self, file):
-        l_file = os.path.dirname(file).replace("data", "label/") + \
-                 os.path.basename(file)
-        img = cv2.cvtColor(cv2.imread(file), cv2.COLOR_BGR2RGB)/255.0
-
-        annot = cv2.imread(l_file, cv2.IMREAD_GRAYSCALE)/255.0
-
-
-        img = extract_patches(img, (self.patch_size, self.patch_size, 3), 256). \
-            reshape(-1, self.patch_size, self.patch_size, 3)
-
-        annot = extract_patches(annot, (self.patch_size, self.patch_size), 256). \
-        reshape(-1, self.patch_size, self.patch_size, 1)
-
-        return img, annot
